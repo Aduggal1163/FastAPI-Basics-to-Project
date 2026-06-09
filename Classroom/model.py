@@ -6,3 +6,9 @@ class Student(BaseModel):
     rollno: int
     standard: int
     section: str
+
+class UpdateStudent(BaseModel):
+    name: str  | None = None
+    rollno: int | None = None
+    standard: int | None = None
+    section: str | None = None
