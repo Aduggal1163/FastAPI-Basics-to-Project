@@ -136,11 +136,6 @@ async def get_students(db : db_dependency, user: user_dependency):
             detail = "Admin access required"
         )
     students = db.query(model.Students).all()
-    if len(students) < 1:
-        raise HTTPException(
-            status_code = 404,
-            detail = "No student found"
-        )
     return students
 
 @app.get("/students/{student_id}", status_code = status.HTTP_200_OK)
@@ -267,11 +262,6 @@ async def get_teachers(db : db_dependency, user: user_dependency):
         raise HTTPException(
             status_code = status.HTTP_403_FORBIDDEN,
             detail = "Access denied"
-        )
-    if len(teachers) < 1:
-        raise HTTPException(
-            status_code = 404,
-            detail = "No teachers found"
         )
     return teachers
 
@@ -403,11 +393,6 @@ async def create_subject(subject : schema.Subject, db: db_dependency, user: user
 @app.get("/subjects", status_code=status.HTTP_200_OK)
 async def get_subjects(db: db_dependency, user: user_dependency):
     subjects = db.query(model.Subjects).all()
-    if len(subjects) < 1:
-        raise HTTPException(
-            status_code=404,
-            detail="No subjects found"
-        )
     return subjects
 
 
@@ -474,12 +459,6 @@ async def get_student_subjects(student_id : int, db: db_dependency, user: user_d
             detail = "Student not found"
         )
     
-    if len(student.subjects) == 0:
-        raise HTTPException(
-            status_code = 404,
-            detail = "No subject is assigned"
-        )
-
     return {
         "student_name" : student.name,
         "subjects" : student.subjects
