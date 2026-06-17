@@ -441,7 +441,7 @@ export default function Dashboard({ setCurrentTab, addToast, user, onOpenLogin }
                 <>
                   <h3 style={sectionTitleStyle}>
                     <Activity size={18} color="var(--primary)" />
-                    <span>Welcome to SchoolPortal</span>
+                    <span>Welcome to ClassMatrix</span>
                   </h3>
                   <div style={actionsGridStyle}>
                     <button onClick={onOpenLogin} style={actionButtonStyle}>

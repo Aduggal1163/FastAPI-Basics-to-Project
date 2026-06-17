@@ -49,7 +49,7 @@ export default function Sidebar({ currentTab, setCurrentTab, user, onLogout, onO
     <aside style={sidebarStyle}>
       <div style={logoContainerStyle}>
         <School size={28} color="var(--primary)" />
-        <span style={logoTextStyle}>SchoolPortal</span>
+        <span style={logoTextStyle}>ClassMatrix</span>
       </div>
 
       <nav style={navStyle}>
