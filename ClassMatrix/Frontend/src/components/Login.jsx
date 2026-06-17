@@ -171,7 +171,7 @@ export default function Login({ onSuccess, onClose, addToast }) {
                 >
                   <option value="student">Student</option>
                   <option value="teacher">Teacher</option>
-                  {/* <option value="admin">Administrator</option> */}
+                  <option value="admin">Administrator</option>
                 </select>
               </div>
 

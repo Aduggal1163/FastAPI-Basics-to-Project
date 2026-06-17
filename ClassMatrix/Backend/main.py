@@ -537,10 +537,8 @@ db:db_dependency
                 raise HTTPException(400, f"Teacher record with ID {teacher_id_val} is already linked to a user account")
         student_id_val = None # Ensure it is null
     elif role_to_save == "admin":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Public registration as admin is not permitted"
-        )
+        student_id_val = None
+        teacher_id_val = None
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
