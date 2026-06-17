@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
-import Dashboard from './components/Dashboard';
+import Navbar from './components/Navbar';
+import Home from './components/Home';
 import StudentsPage from './components/StudentsPage';
 import TeachersPage from './components/TeachersPage';
 import SubjectsPage from './components/SubjectsPage';
@@ -12,7 +12,7 @@ import ToastContainer from './components/Toast';
 import { api } from './api';
 
 function App() {
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [currentTab, setCurrentTab] = useState('home');
   const [user, setUser] = useState(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -63,7 +63,7 @@ function App() {
     
     addToast(`Welcome back, ${username}!`, 'success');
     setIsLoginOpen(false);
-    setCurrentTab('dashboard');
+    setCurrentTab('home');
   };
 
   const handleLogout = () => {
@@ -74,7 +74,7 @@ function App() {
     localStorage.removeItem('sms_teacher_id');
     setUser(null);
     addToast('Logged out successfully', 'success');
-    setCurrentTab('dashboard');
+    setCurrentTab('home');
   };
 
   const renderContent = () => {
@@ -85,13 +85,14 @@ function App() {
     };
 
     switch (currentTab) {
-      case 'dashboard':
+      case 'home':
         return (
-          <Dashboard 
-            setCurrentTab={setCurrentTab} 
-            addToast={addToast} 
-            user={user} 
+          <Home 
             onOpenLogin={commonProps.onOpenLogin}
+            isAuthenticated={commonProps.isAuthenticated}
+            setCurrentTab={setCurrentTab}
+            user={user}
+            addToast={addToast}
           />
         );
       case 'students':
@@ -108,11 +109,12 @@ function App() {
         return <StudentProfileView studentId={user?.student_id} addToast={addToast} />;
       default:
         return (
-          <Dashboard 
-            setCurrentTab={setCurrentTab} 
-            addToast={addToast} 
-            user={user} 
+          <Home 
             onOpenLogin={commonProps.onOpenLogin}
+            isAuthenticated={commonProps.isAuthenticated}
+            setCurrentTab={setCurrentTab}
+            user={user}
+            addToast={addToast}
           />
         );
     }
@@ -123,8 +125,8 @@ function App() {
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
 
-      {/* Navigation Sidebar */}
-      <Sidebar
+      {/* Navigation Navbar */}
+      <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
         user={user}

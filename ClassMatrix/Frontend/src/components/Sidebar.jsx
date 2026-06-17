@@ -7,18 +7,21 @@ import {
   LogOut, 
   LogIn,
   School,
-  ShieldAlert
+  ShieldAlert,
+  Home as HomeIcon
 } from 'lucide-react';
 
 export default function Sidebar({ currentTab, setCurrentTab, user, onLogout, onOpenLogin }) {
   const getMenuItems = () => {
     if (!user) {
       return [
+        { id: 'home', label: 'Home', icon: HomeIcon },
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
       ];
     }
 
     const items = [
+      { id: 'home', label: 'Home', icon: HomeIcon },
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }
     ];
 
