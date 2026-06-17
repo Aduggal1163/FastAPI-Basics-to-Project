@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from db import SessionLocal
+from db import SessionLocal, get_db
 import model
 from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
@@ -81,9 +81,8 @@ def authenticate_user(
 
 
 def get_current_user(
-    token: str = Depends(
-        oauth2_scheme
-    )
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
 ):
 
     credentials_exception = HTTPException(
@@ -109,8 +108,6 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    db = SessionLocal()
-
     user = (
         db.query(model.Users)
         .filter(
@@ -119,8 +116,6 @@ def get_current_user(
         )
         .first()
     )
-
-    db.close()
 
     if not user:
         raise credentials_exception

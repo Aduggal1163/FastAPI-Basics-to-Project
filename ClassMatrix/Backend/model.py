@@ -5,8 +5,8 @@ from db import Base
 
 class StudentSubjects(Base):
     __tablename__ = 'Student_Subject'
-    student_id = Column(Integer,ForeignKey("Students.id"), primary_key = True)
-    subject_id = Column(Integer,ForeignKey("Subjects.id"), primary_key = True) 
+    student_id = Column(Integer,ForeignKey("Students.id", ondelete="CASCADE"), primary_key = True)
+    subject_id = Column(Integer,ForeignKey("Subjects.id", ondelete="CASCADE"), primary_key = True) 
 
 class Students (Base):
     __tablename__ = 'Students'

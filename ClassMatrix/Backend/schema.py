@@ -21,6 +21,7 @@ class Teachers(BaseModel):
 
 class UpdateTeacher(BaseModel):
     name: Optional[str] = None
+    section: Optional[str] = None
 
 class Subject(BaseModel):
     id: int

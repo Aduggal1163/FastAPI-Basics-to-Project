@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from db import engine,SessionLocal
+from db import engine, SessionLocal, get_db
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import Annotated
@@ -28,9 +28,11 @@ app.add_middleware(
 
 model.Base.metadata.create_all(bind=engine)
 
-# Programmatic migrations to add role, student_id, and teacher_id to Users table if not present
+# Programmatic migrations to add role, student_id, and teacher_id to Users table if not present,
+# and to update Student_Subject constraints to use ON DELETE CASCADE.
 try:
-    with engine.connect() as conn:
+    with engine.begin() as conn:
+        # 1. Migrate Users table if necessary
         res = conn.execute(text("SHOW COLUMNS FROM Users LIKE 'role'")).fetchone()
         if not res:
             # We must add role, student_id, teacher_id
@@ -47,16 +49,31 @@ try:
                 conn.execute(text("ALTER TABLE Users ADD CONSTRAINT fk_user_teacher FOREIGN KEY (teacher_id) REFERENCES Teachers(id) ON DELETE SET NULL"))
             except Exception as e:
                 print("FK Teacher constraint warning:", e)
+
+        # 2. Migrate Student_Subject constraints to cascade delete if necessary
+        # Drop old default foreign key constraints if they exist
+        try:
+            conn.execute(text("ALTER TABLE Student_Subject DROP FOREIGN KEY student_subject_ibfk_1"))
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE Student_Subject DROP FOREIGN KEY student_subject_ibfk_2"))
+        except Exception:
+            pass
+        
+        # Add new foreign key constraints with ON DELETE CASCADE
+        try:
+            conn.execute(text("ALTER TABLE Student_Subject ADD CONSTRAINT fk_student_subject_student FOREIGN KEY (student_id) REFERENCES Students(id) ON DELETE CASCADE"))
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE Student_Subject ADD CONSTRAINT fk_student_subject_subject FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE CASCADE"))
+        except Exception:
+            pass
 except Exception as err:
     print("Database migration error / skipped:", err)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
+# Dependency for database session
 db_dependency = Annotated[Session,Depends(get_db)]
 user_dependency = Annotated[
     model.Users,
@@ -78,6 +95,11 @@ async def get_public_stats(db: db_dependency):
 
 @app.post("/students",status_code = status.HTTP_201_CREATED)
 async def create_student(student : schema.Student, db : db_dependency, user: user_dependency):
+    if user.role != "admin":
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Admin access required"
+        )
     existed = db.query(model.Students).filter(model.Students.id == student.id).first()
     if existed:
         raise HTTPException(
@@ -208,6 +230,11 @@ async def delete_student_by_id(student_id : int, db: db_dependency, user: user_d
 
 @app.post("/teachers",status_code = status.HTTP_201_CREATED)
 async def create_teacher(teacher : schema.Teachers, db : db_dependency, user: user_dependency):
+    if user.role != "admin":
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "Admin access required"
+        )
     existed = db.query(model.Teachers).filter(model.Teachers.id == teacher.id).first()
     if existed:
         raise HTTPException(
@@ -286,6 +313,8 @@ async def update_teacher_by_id(teacher_id : int, data : schema.UpdateTeacher, db
         )
     if data.name is not None:
         teachers.name = data.name
+    if data.section is not None:
+        teachers.section = data.section
     
     db.commit()
     db.refresh(teachers)
@@ -304,8 +333,15 @@ async def delete_teacher_by_id(teacher_id : int, db: db_dependency, user: user_d
             status_code = 404,
             detail = "No teachers found"
         )
-    db.delete(teachers)
-    db.commit()
+    try:
+        db.delete(teachers)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete teacher because they have assigned students. Reassign or delete the students first."
+        )
     return {
         "message":"teachers deleted successfully",
         "teachers":db.query(model.Teachers).all()

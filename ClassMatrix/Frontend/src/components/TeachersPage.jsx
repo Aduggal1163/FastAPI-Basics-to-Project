@@ -148,14 +148,15 @@ export default function TeachersPage({ addToast, isAuthenticated, onOpenLogin })
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name) {
-      addToast('Name is required', 'error');
+    if (!formData.name || !formData.section) {
+      addToast('Name and Section are required', 'error');
       return;
     }
 
     try {
       await api.updateTeacher(currentTeacher.id, {
         name: formData.name.trim(),
+        section: formData.section.trim(),
       });
       addToast('Teacher profile updated successfully!', 'success');
       setIsEditModalOpen(false);
@@ -346,7 +347,7 @@ export default function TeachersPage({ addToast, isAuthenticated, onOpenLogin })
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3 className="modal-title">Edit Teacher Name</h3>
+              <h3 className="modal-title">Edit Teacher Details</h3>
               <button className="btn-icon" onClick={() => setIsEditModalOpen(false)}>
                 <X size={16} />
               </button>
@@ -360,6 +361,16 @@ export default function TeachersPage({ addToast, isAuthenticated, onOpenLogin })
                     className="form-control" 
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Assigned Department / Section</label>
+                  <input 
+                    type="text" 
+                    className="form-control" 
+                    value={formData.section}
+                    onChange={(e) => setFormData({...formData, section: e.target.value})}
                     required
                   />
                 </div>
