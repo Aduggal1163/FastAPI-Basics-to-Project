@@ -5,5 +5,5 @@ pymysql
 pydantic
 passlib[bcrypt]
 python-jose[cryptography]
-python-multipartls
+python-multipart
 python-dotenv
